@@ -26,5 +26,5 @@ services:
       INTERVAL: '*/30 * * * *'
       DATABASE_JSON_FILEPATH: './data/db.json'
     volumes:
-      - './data:/data'
+      - './data:/usr/src/app/data'
 ```
