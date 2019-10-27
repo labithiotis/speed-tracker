@@ -17,7 +17,7 @@ version: '3.4'
 services:
   speed-tracker:
     container_name: speed-tracker
-    build: labithiotis/speed-tracker
+    image: labithiotis/speed-tracker
     restart: always
     ports:
       - '8000:8000'
