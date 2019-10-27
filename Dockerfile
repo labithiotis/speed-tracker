@@ -1,5 +1,4 @@
-FROM node:alpine
-FROM node:10
+FROM node:12-alpine
 WORKDIR /usr/src/app
 RUN mkdir tmp
 COPY . ./tmp
