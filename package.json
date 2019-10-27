@@ -1,0 +1,64 @@
+{
+  "name": "speed-tracker",
+  "author": "Darren Labithiotis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "browserslist": [
+    "last 1 Chrome versions"
+  ],
+  "scripts": {
+    "start": "nodemon",
+    "start-app": "parcel ./src/app/index.html --port 3001 -d ./build/public",
+    "build": "tsc --noEmit false",
+    "build-app": "parcel build ./src/app/index.html -d ./build/public",
+    "test": "jest"
+  },
+  "dependencies": {
+    "cron": "^1.7.2",
+    "fastify": "^2.10.0",
+    "fastify-cors": "^2.1.3",
+    "fastify-static": "^2.5.0",
+    "lowdb": "^1.0.0",
+    "pondjs": "^0.8.10",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-imported-component": "^6.2.0",
+    "react-timeseries-charts": "^0.16.1",
+    "reset-css": "^5.0.1",
+    "speedtest-net": "^1.6.0",
+    "styled-components": "^4.4.0",
+    "ts-node": "^7.0.1",
+    "winston": "^3.2.1",
+    "winston-transport": "^4.3.0"
+  },
+  "devDependencies": {
+    "@types/cron": "^1.7.1",
+    "@types/jest": "^24.0.20",
+    "@types/lowdb": "^1.0.9",
+    "@types/node": "^12.11.7",
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.3",
+    "@types/styled-components": "^4.1.19",
+    "jest": "^24.9.0",
+    "nodemon": "^1.19.4",
+    "parcel-bundler": "^1.12.4",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.4"
+  },
+  "jest": {
+    "testRegex": "\\.tests\\.ts",
+    "modulePaths": [
+      "src"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  }
+}

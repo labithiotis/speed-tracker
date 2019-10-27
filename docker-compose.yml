@@ -1,0 +1,14 @@
+version: '3.4'
+services:
+  speed-tracker:
+    container_name: speed-tracker
+    build: .
+    restart: always
+    ports:
+      - '8000:8000'
+    environment:
+      PORT: '8000'
+      INTERVAL: '*/5 * * * *'
+      DATABASE_JSON_FILEPATH: './data/db.json'
+    volumes:
+      - './data:/build/data'

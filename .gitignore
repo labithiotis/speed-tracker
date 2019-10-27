@@ -1,0 +1,9 @@
+.cache
+.log
+node_modules
+public
+dist
+build/*
+!build/.gitkeep
+!build/data/.gitkeep
+db.json
