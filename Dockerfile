@@ -1,12 +1,12 @@
 FROM node:alpine
 FROM node:10
 WORKDIR /usr/src/app
-COPY package.json ./
-COPY yarn.lock ./
-COPY . .
-RUN yarn
-RUN yarn build-app
-RUN yarn build
-WORKDIR /usr/src/app/build
+RUN mkdir tmp
+COPY . ./tmp
+RUN cd tmp && yarn && yarn build-app && yarn build
+RUN mv ./tmp/build/* .
+RUN mv ./tmp/node_modules node_modules
+RUN rm -rf tmp
+RUN mkdir data
 ENV NODE_ENV=production
 CMD ["node", "index.js"]

@@ -7,6 +7,8 @@ import config from './config/config';
 const logger = createLogger(config.logLevel);
 
 (async function() {
+  logger.info('Starting....');
+
   const store = new Store(logger);
   new DataCollector(logger, store);
 

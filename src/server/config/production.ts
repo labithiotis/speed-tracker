@@ -3,7 +3,7 @@ import { Config } from './config';
 const {
   PORT = '80',
   INTERVAL = '*/30 * * * *',
-  DATABASE_JSON_FILEPATH = './data/db.json',
+  DATABASE_JSON_FILEPATH = 'data/db.json',
 } = process.env;
 
 const config: Config = {

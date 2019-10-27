@@ -7,6 +7,7 @@ import { Store } from './Store';
 
 export class DataCollector {
   constructor(private logger: Logger, private store: Store) {
+    this.logger.info('Starting interval at %s', config.interval);
     new CronJob({ cronTime: config.interval, onTick: this.onTick, start: true });
   }
 

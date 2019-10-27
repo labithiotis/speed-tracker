@@ -1,4 +1,4 @@
-import lowdb, { AdapterSync, LowdbSync, AdapterAsync, LowdbFpSync } from "lowdb";
+import lowdb from "lowdb";
 import FileSync from 'lowdb/adapters/FileSync';
 import config from './config/config';
 
@@ -15,7 +15,7 @@ export class Store {
   db: any;
 
   constructor(private logger: Logger) {
-    this.logger.info('Database filepath', config.dataBaseJsonFilePath);
+    this.logger.info('Database filepath %s', config.dataBaseJsonFilePath);
     this.db = lowdb(new FileSync(config.dataBaseJsonFilePath));
     this.db.defaults({ speeds: [] }).write();
   }
