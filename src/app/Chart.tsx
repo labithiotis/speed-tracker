@@ -64,6 +64,7 @@ export default class Chart extends PureComponent<Props, State> {
     if (duration.includes('minute')) {
       return '5s';
     }
+    return '1d';
   }
 
   getMarkerData = (series: any) => {
