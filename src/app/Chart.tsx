@@ -1,4 +1,4 @@
-import { TimeSeries, TimeRange } from 'pondjs';
+import { TimeSeries, TimeRange, avg, filter } from 'pondjs';
 import React, { PureComponent } from 'react';
 import {
   ChartContainer,
@@ -46,11 +46,17 @@ export default class Chart extends PureComponent<Props, State> {
 
   getAlignWindow() {
     const duration = this.state.timeRange.humanizeDuration();
+    if (duration.includes('months')) {
+      return '1d';
+    }
     if (duration.includes('month')) {
-      return '1h';
+      return '12h';
+    }
+    if (duration.includes('days')) {
+      return '6h';
     }
     if (duration.includes('day')) {
-      return '10m';
+      return '1h';
     }
     if (duration.includes('hour')) {
       return '5m';
@@ -78,16 +84,14 @@ export default class Chart extends PureComponent<Props, State> {
       points: this.props.data.map(record => [record.timestamp, record.download, record.upload, record.ping]),
     };
     const initialSeries = new TimeSeries(data);
-    const series = initialSeries
-      .fill({
-        fieldSpec: [Columns.download, Columns.upload, Columns.ping],
-        method: 'zero',
-        limit: 3,
-      })
-      .align({
-        fieldSpec: [Columns.download, Columns.upload, Columns.ping],
-        period: this.getAlignWindow(),
-      });
+    const series = initialSeries.fixedWindowRollup({
+      windowSize: this.getAlignWindow(),
+      aggregation: {
+        [Columns.download]: { [Columns.download]: avg(filter.ignoreMissing) },
+        [Columns.upload]: { [Columns.upload]: avg(filter.ignoreMissing) },
+        [Columns.ping]: { [Columns.ping]: avg(filter.ignoreMissing) },
+      },
+    });
     const markerData = this.getMarkerData(series);
     return (
       <div>
@@ -98,7 +102,8 @@ export default class Chart extends PureComponent<Props, State> {
             enablePanZoom={true}
             timeRange={this.state.timeRange}
             onTimeRangeChanged={this.handleTimeRangeChange}
-            onTrackerChanged={this.handleTrackerChanged}
+            // Todo don't re-render charts on hover
+            // onTrackerChanged={this.handleTrackerChanged}
           >
             <ChartRow height="500">
               <YAxis
@@ -109,7 +114,7 @@ export default class Chart extends PureComponent<Props, State> {
                 type="linear"
                 format=",.0f"
                 transition={400}
-                width={20}
+                width={30}
                 labelOffset={50}
                 style={{ ticks: { display: 'none' }, axis: { display: 'none' } }}
               />

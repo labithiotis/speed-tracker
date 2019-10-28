@@ -1,4 +1,4 @@
-import lowdb from "lowdb";
+import lowdb from 'lowdb';
 import FileSync from 'lowdb/adapters/FileSync';
 import config from './config/config';
 
