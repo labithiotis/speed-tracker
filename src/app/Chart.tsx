@@ -81,6 +81,7 @@ type ChartingProps = {
 };
 
 type State = {
+  selection?: string;
   trackerPosition?: string;
   selected: { [key in Columns]: boolean };
 };
@@ -96,6 +97,10 @@ export class Charting extends PureComponent<ChartingProps, State> {
 
   updateTrackerPosition = (trackerPosition: string) => {
     this.setState({ trackerPosition });
+  };
+
+  updateSelection = (selection: string) => {
+    this.setState({ selection: this.state.selection === selection ? undefined : selection });
   };
 
   getMarkerData = (series: TimeSeries) => {
@@ -150,6 +155,8 @@ export class Charting extends PureComponent<ChartingProps, State> {
                   style={style}
                   interpolation="curveMonotoneX"
                   visible={this.state.selected[Columns.ping]}
+                  selection={this.state.selection}
+                  onSelectionChange={this.updateSelection}
                 />
                 <LineChart
                   axis="speed"
@@ -158,6 +165,8 @@ export class Charting extends PureComponent<ChartingProps, State> {
                   style={style}
                   interpolation="curveMonotoneX"
                   visible={this.state.selected[Columns.upload]}
+                  selection={this.state.selection}
+                  onSelectionChange={this.updateSelection}
                 />
                 <LineChart
                   axis="speed"
@@ -166,6 +175,8 @@ export class Charting extends PureComponent<ChartingProps, State> {
                   style={style}
                   interpolation="curveMonotoneX"
                   visible={this.state.selected[Columns.download]}
+                  selection={this.state.selection}
+                  onSelectionChange={this.updateSelection}
                 />
                 <EventMarker
                   type="point"
@@ -262,9 +273,9 @@ const COLOR_UPLOAD = '#a03828';
 const COLOR_PING = '#9e49a0';
 
 const style = styler([
-  { key: Columns.download, color: COLOR_DOWNLOAD, selected: 'white', width: 3 },
-  { key: Columns.upload, color: COLOR_UPLOAD, selected: 'white', width: 3 },
-  { key: Columns.ping, color: COLOR_PING, selected: 'white', width: 2, dashed: true },
+  { key: Columns.download, color: COLOR_DOWNLOAD, width: 3 },
+  { key: Columns.upload, color: COLOR_UPLOAD, width: 3 },
+  { key: Columns.ping, color: COLOR_PING, width: 2, dashed: true },
 ]);
 
 const LegendContainer = styled.div`
