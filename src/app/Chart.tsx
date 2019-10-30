@@ -1,4 +1,4 @@
-import { TimeSeries, TimeRange, avg, filter } from 'pondjs';
+import { TimeSeries, TimeRange, avg, filter, FillMethod } from 'pondjs';
 import React, { PureComponent } from 'react';
 import {
   ChartContainer,
@@ -19,28 +19,16 @@ enum Columns {
   upload = 'upload',
   ping = 'ping',
 }
-type Props = { data: Record[] };
-type State = {
-  timeRange: any;
-  trackerPosition?: string;
-  selected: { [key in Columns]: boolean };
-};
 
-export default class Chart extends PureComponent<Props, State> {
-  state: State = {
+type ChartProps = { data: Record[] };
+type ChartState = { timeRange: TimeRange };
+
+export default class Chart extends PureComponent<ChartProps, ChartState> {
+  state = {
     timeRange: new TimeRange([Date.now() - 1000 * 60 * 60 * 24, Date.now()]),
-    selected: {
-      [Columns.download]: false,
-      [Columns.upload]: false,
-      [Columns.ping]: false,
-    },
   };
 
-  handleTrackerChanged = (trackerPosition: any) => {
-    this.setState({ trackerPosition });
-  };
-
-  handleTimeRangeChange = (timeRange: TimeRanges) => {
+  updateTimeRange = (timeRange: TimeRange) => {
     this.setState({ timeRange });
   };
 
@@ -56,27 +44,16 @@ export default class Chart extends PureComponent<Props, State> {
       return '6h';
     }
     if (duration.includes('day')) {
-      return '1h';
+      return '2h';
     }
     if (duration.includes('hour')) {
-      return '5m';
+      return '1h';
     }
     if (duration.includes('minute')) {
-      return '5s';
+      return '5m';
     }
     return '1d';
   }
-
-  getMarkerData = (series: any) => {
-    if (!this.state.trackerPosition) {
-      return { event: null, label: null };
-    }
-    const event = series.atTime(this.state.trackerPosition);
-    const download = event.get(Columns.download).toFixed(2);
-    const upload = event.get(Columns.upload).toFixed(2);
-    const ping = event.get(Columns.ping).toFixed(0);
-    return { event, download, upload, ping };
-  };
 
   render() {
     const data = {
@@ -84,8 +61,7 @@ export default class Chart extends PureComponent<Props, State> {
       columns: ['time', Columns.download, Columns.upload, Columns.ping],
       points: this.props.data.map(record => [record.timestamp, record.download, record.upload, record.ping]),
     };
-    const initialSeries = new TimeSeries(data);
-    const series = initialSeries.fixedWindowRollup({
+    const series = new TimeSeries(data).crop(this.state.timeRange).fixedWindowRollup({
       windowSize: this.getAlignWindow(),
       aggregation: {
         [Columns.download]: { [Columns.download]: avg(filter.ignoreMissing) },
@@ -93,25 +69,72 @@ export default class Chart extends PureComponent<Props, State> {
         [Columns.ping]: { [Columns.ping]: avg(filter.ignoreMissing) },
       },
     });
+
+    return <Charting series={series} timeRange={this.state.timeRange} updateTimeRange={this.updateTimeRange} />;
+  }
+}
+
+type ChartingProps = {
+  series: TimeSeries;
+  timeRange: TimeRange;
+  updateTimeRange: (timeRange: TimeRange) => void;
+};
+
+type State = {
+  trackerPosition?: string;
+  selected: { [key in Columns]: boolean };
+};
+
+export class Charting extends PureComponent<ChartingProps, State> {
+  state: State = {
+    selected: {
+      [Columns.download]: true,
+      [Columns.upload]: true,
+      [Columns.ping]: true,
+    },
+  };
+
+  updateTrackerPosition = (trackerPosition: string) => {
+    this.setState({ trackerPosition });
+  };
+
+  getMarkerData = (series: TimeSeries) => {
+    if (!this.state.trackerPosition) {
+      return { event: null, label: null };
+    }
+
+    const event = series.atTime(this.state.trackerPosition);
+
+    if (!event) {
+      return { event: null, label: null };
+    }
+
+    const download = event.get(Columns.download).toFixed(2);
+    const upload = event.get(Columns.upload).toFixed(2);
+    const ping = event.get(Columns.ping).toFixed(0);
+    return { event, download, upload, ping };
+  };
+
+  render() {
+    const { series } = this.props;
     const markerData = this.getMarkerData(series);
     return (
       <div>
         <Resizable>
           <ChartContainer
-            minDuration={1000 * 60 * 5}
+            minDuration={1000 * 60 * 60 * 6}
             maxTime={new Date()}
             enablePanZoom={true}
-            timeRange={this.state.timeRange}
-            onTimeRangeChanged={this.handleTimeRangeChange}
-            // Todo don't re-render charts on hover
-            // onTrackerChanged={this.handleTrackerChanged}
+            timeRange={this.props.timeRange}
+            onTimeRangeChanged={this.props.updateTimeRange}
+            onTrackerChanged={this.updateTrackerPosition}
           >
-            <ChartRow height="500">
+            <ChartRow height="500" trackerShowTime={true}>
               <YAxis
                 id="speed"
                 label="Speed Mbps"
                 min={0}
-                max={Math.max(10, series.crop(this.state.timeRange).max(Columns.download))}
+                max={Math.max(10, series.crop(this.props.timeRange).max(Columns.download))}
                 type="linear"
                 format=",.0f"
                 transition={400}
@@ -126,7 +149,7 @@ export default class Chart extends PureComponent<Props, State> {
                   columns={[Columns.ping]}
                   style={style}
                   interpolation="curveMonotoneX"
-                  selection={this.state.selected[Columns.ping]}
+                  visible={this.state.selected[Columns.ping]}
                 />
                 <LineChart
                   axis="speed"
@@ -134,7 +157,7 @@ export default class Chart extends PureComponent<Props, State> {
                   columns={[Columns.upload]}
                   style={style}
                   interpolation="curveMonotoneX"
-                  selection={this.state.selected[Columns.upload]}
+                  visible={this.state.selected[Columns.upload]}
                 />
                 <LineChart
                   axis="speed"
@@ -142,7 +165,7 @@ export default class Chart extends PureComponent<Props, State> {
                   columns={[Columns.download]}
                   style={style}
                   interpolation="curveMonotoneX"
-                  selection={this.state.selected[Columns.download]}
+                  visible={this.state.selected[Columns.download]}
                 />
                 <EventMarker
                   type="point"
@@ -182,7 +205,7 @@ export default class Chart extends PureComponent<Props, State> {
                 id={Columns.ping}
                 label="Ping"
                 min={0}
-                max={series.crop(this.state.timeRange).max(Columns.ping)}
+                max={series.crop(this.props.timeRange).max(Columns.ping)}
                 type="linear"
                 format=",.0s"
                 transition={400}
@@ -203,19 +226,19 @@ export default class Chart extends PureComponent<Props, State> {
               {
                 key: Columns.download,
                 label: 'Download',
-                disabled: this.state.selected[Columns.download],
+                disabled: !this.state.selected[Columns.download],
                 style: { backgroundColor: COLOR_DOWNLOAD },
               },
               {
                 key: Columns.upload,
                 label: 'Upload',
-                disabled: this.state.selected[Columns.upload],
+                disabled: !this.state.selected[Columns.upload],
                 style: { backgroundColor: COLOR_UPLOAD },
               },
               {
                 key: Columns.ping,
                 label: 'Ping',
-                disabled: this.state.selected[Columns.ping],
+                disabled: !this.state.selected[Columns.ping],
                 style: { backgroundColor: COLOR_PING },
               },
             ]}
