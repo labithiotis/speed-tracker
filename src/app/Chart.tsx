@@ -1,5 +1,5 @@
 import { TimeSeries, TimeRange, avg, filter, FillMethod } from 'pondjs';
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import {
   ChartContainer,
   ChartRow,
@@ -23,6 +23,8 @@ enum Columns {
 type ChartProps = { data: Record[] };
 type ChartState = { timeRange: TimeRange };
 
+const ONE_DAY = 1000 * 60 * 60 * 24;
+
 export default class Chart extends PureComponent<ChartProps, ChartState> {
   state = {
     timeRange: new TimeRange([Date.now() - 1000 * 60 * 60 * 24, Date.now()]),
@@ -30,6 +32,32 @@ export default class Chart extends PureComponent<ChartProps, ChartState> {
 
   updateTimeRange = (timeRange: TimeRange) => {
     this.setState({ timeRange });
+  };
+
+  setTimeRange = (type: string) => () => {
+    switch (type) {
+      case 'today': {
+        const timeRange = this.state.timeRange.setBegin(new Date(Date.now() - ONE_DAY)).setEnd(new Date());
+        console.log(timeRange);
+        this.setState({ timeRange });
+        break;
+      }
+      case 'week': {
+        const timeRange = this.state.timeRange.setBegin(new Date(Date.now() - ONE_DAY * 7)).setEnd(new Date());
+        this.setState({ timeRange });
+        break;
+      }
+      case 'month': {
+        const timeRange = this.state.timeRange.setBegin(new Date(Date.now() - ONE_DAY * 30)).setEnd(new Date());
+        this.setState({ timeRange });
+        break;
+      }
+      case 'year': {
+        const timeRange = this.state.timeRange.setBegin(new Date(Date.now() - ONE_DAY * 365)).setEnd(new Date());
+        this.setState({ timeRange });
+        break;
+      }
+    }
   };
 
   getAlignWindow() {
@@ -70,7 +98,17 @@ export default class Chart extends PureComponent<ChartProps, ChartState> {
       },
     });
 
-    return <Charting series={series} timeRange={this.state.timeRange} updateTimeRange={this.updateTimeRange} />;
+    return (
+      <Fragment>
+        <DateContainer>
+          <DateSelection onClick={this.setTimeRange('year')}>Last year</DateSelection>
+          <DateSelection onClick={this.setTimeRange('month')}>Last month</DateSelection>
+          <DateSelection onClick={this.setTimeRange('week')}>Last week</DateSelection>
+          <DateSelection onClick={this.setTimeRange('today')}>Today</DateSelection>
+        </DateContainer>
+        <Charting series={series} timeRange={this.state.timeRange} updateTimeRange={this.updateTimeRange} />
+      </Fragment>
+    );
   }
 }
 
@@ -281,5 +319,27 @@ const style = styler([
 const LegendContainer = styled.div`
   * {
     color: white !important;
+  }
+`;
+
+const DateContainer = styled.div`
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+`;
+const DateSelection = styled.div`
+  background-color: #2e2e2e;
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  color: #b8b8b8;
+  margin-left: 5px;
+  font-size: 14px;
+  
+  : hover {
+    background-color: #343434;
+      color: #e8e8e8;
   }
 `;
