@@ -27,7 +27,7 @@ const ONE_DAY = 1000 * 60 * 60 * 24;
 
 export default class Chart extends PureComponent<ChartProps, ChartState> {
   state = {
-    timeRange: new TimeRange([Date.now() - 1000 * 60 * 60 * 24, Date.now()]),
+    timeRange: new TimeRange([Date.now() - 1000 * 60 * 60 * 24 * 7, Date.now()]),
   };
 
   updateTimeRange = (timeRange: TimeRange) => {
@@ -38,7 +38,6 @@ export default class Chart extends PureComponent<ChartProps, ChartState> {
     switch (type) {
       case 'today': {
         const timeRange = this.state.timeRange.setBegin(new Date(Date.now() - ONE_DAY)).setEnd(new Date());
-        console.log(timeRange);
         this.setState({ timeRange });
         break;
       }
@@ -72,15 +71,25 @@ export default class Chart extends PureComponent<ChartProps, ChartState> {
       return '6h';
     }
     if (duration.includes('day')) {
-      return '2h';
-    }
-    if (duration.includes('hour')) {
       return '1h';
     }
+    if (duration.includes('hours')) {
+      return '30m';
+    }
+    if (duration.includes('hour')) {
+      return '10m';
+    }
     if (duration.includes('minute')) {
-      return '5m';
+      return '1m';
     }
     return '1d';
+  }
+
+  cropRange() {
+    const begin = this.state.timeRange.begin();
+    const end = this.state.timeRange.end();
+    const duration = this.state.timeRange.duration() / 2;
+    return this.state.timeRange.setBegin(new Date(begin - duration)).setEnd(new Date(end + duration));
   }
 
   render() {
@@ -89,7 +98,7 @@ export default class Chart extends PureComponent<ChartProps, ChartState> {
       columns: ['time', Columns.download, Columns.upload, Columns.ping],
       points: this.props.data.map(record => [record.timestamp, record.download, record.upload, record.ping]),
     };
-    const series = new TimeSeries(data).crop(this.state.timeRange).fixedWindowRollup({
+    const series = new TimeSeries(data).crop(this.cropRange()).fixedWindowRollup({
       windowSize: this.getAlignWindow(),
       aggregation: {
         [Columns.download]: { [Columns.download]: avg(filter.ignoreMissing) },
@@ -337,9 +346,9 @@ const DateSelection = styled.div`
   color: #b8b8b8;
   margin-left: 5px;
   font-size: 14px;
-  
+
   : hover {
     background-color: #343434;
-      color: #e8e8e8;
+    color: #e8e8e8;
   }
 `;
