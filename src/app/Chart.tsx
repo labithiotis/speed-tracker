@@ -1,4 +1,4 @@
-import { TimeSeries, TimeRange, avg, filter, FillMethod } from 'pondjs';
+import { TimeSeries, TimeRange, median, filter } from 'pondjs';
 import React, { PureComponent, Fragment } from 'react';
 import {
   ChartContainer,
@@ -101,9 +101,9 @@ export default class Chart extends PureComponent<ChartProps, ChartState> {
     const series = new TimeSeries(data).crop(this.cropRange()).fixedWindowRollup({
       windowSize: this.getAlignWindow(),
       aggregation: {
-        [Columns.download]: { [Columns.download]: avg(filter.ignoreMissing) },
-        [Columns.upload]: { [Columns.upload]: avg(filter.ignoreMissing) },
-        [Columns.ping]: { [Columns.ping]: avg(filter.ignoreMissing) },
+        [Columns.download]: { [Columns.download]: median(filter.ignoreMissing) },
+        [Columns.upload]: { [Columns.upload]: median(filter.ignoreMissing) },
+        [Columns.ping]: { [Columns.ping]: median(filter.ignoreMissing) },
       },
     });
 
