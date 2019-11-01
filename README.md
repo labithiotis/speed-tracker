@@ -2,7 +2,9 @@
 
 Track your network download, upload and ping.
 
-Set interval you wish to run and track progress via a simple GUI.
+![image](./assets/preview.png)
+
+Set an interval you wish to run and track progress via a simple GUI.
 
 | Variable                 | Default          | Info                                                       |
 | ------------------------ | ---------------- | ---------------------------------------------------------- |
