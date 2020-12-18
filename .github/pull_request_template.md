@@ -1,11 +1,3 @@
----
-name: "Feature Request"
-about: "Request a feature"
-title: "feat: "
-labels: "enhancement"
-assignees: "labithiotis"
----
-
 ### What does this PR do?
 
 <!-- A simple technical explanation would be very helpful usually 😊 -->
