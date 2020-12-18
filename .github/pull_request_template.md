@@ -1,7 +1,7 @@
 ---
-title:
+title: ''
 labels: e2e, deploy-build
-assignees: 
+assignees: ''
 ---
 
 ### What does this PR do?
