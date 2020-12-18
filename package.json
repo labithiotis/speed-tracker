@@ -2,7 +2,7 @@
   "name": "speed-tracker",
   "author": "Darren Labithiotis",
   "version": "1.0.0",
-  "description": "",
+  "description": "Checks the speed of internet are regular intervals and has small web dashboard for results",
   "main": "index.js",
   "license": "UNLICENSED",
   "browserslist": [
