@@ -1,7 +1,9 @@
 ---
-title: ''
-labels: e2e, deploy-build
-assignees: ''
+name: "Feature Request"
+about: "Request a feature"
+title: "feat: "
+labels: "enhancement"
+assignees: "labithiotis"
 ---
 
 ### What does this PR do?
